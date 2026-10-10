@@ -1,3 +1,5 @@
+import pytest
+
 from mddocslint import markdown
 
 
@@ -53,3 +55,35 @@ def test_headings_parse_levels_and_text() -> None:
 def test_heading_keeps_hash_inside_text() -> None:
     [heading] = markdown.iter_headings(["## C# tips"])
     assert heading.text == "C# tips"
+
+
+@pytest.mark.parametrize(
+    ("text", "slug"),
+    [
+        ("Hello World", "hello-world"),
+        ("What's new?", "whats-new"),
+        ("Use `foo()` here", "use-foo-here"),
+        ("[Linked](other.md) title", "linked-title"),
+        ("snake_case and kebab-case", "snake_case-and-kebab-case"),
+        ("Déjà vu", "déjà-vu"),
+    ],
+)
+def test_slugify(text: str, slug: str) -> None:
+    assert markdown.slugify(text) == slug
+
+
+def test_anchors_number_duplicate_headings() -> None:
+    lines = ["# Intro", "## Intro", "## Intro", "## Other"]
+    assert markdown.anchors(lines) == {"intro", "intro-1", "intro-2", "other"}
+
+
+def test_anchors_ignore_headings_in_fences() -> None:
+    assert markdown.anchors(["# Real", "```", "# Fake", "```"]) == {"real"}
+
+
+def test_strip_code_spans_keeps_columns() -> None:
+    line = "see `[x](y.md)` and ``a ` b``"
+    stripped = markdown.strip_code_spans(line)
+    assert len(stripped) == len(line)
+    assert "[x]" not in stripped
+    assert stripped.startswith("see ")

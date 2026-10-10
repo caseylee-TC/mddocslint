@@ -4,6 +4,8 @@ from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 from pathlib import Path
 
+from mddocslint import markdown
+
 
 @dataclass(frozen=True, order=True)
 class Problem:
@@ -34,11 +36,19 @@ def read_lines(path: Path) -> list[str]:
     return path.read_text(encoding="utf-8-sig", errors="replace").splitlines()
 
 
-@dataclass(frozen=True)
 class LintContext:
     """Per-root state shared by the rules while linting one PATH argument."""
 
-    root: Path
+    def __init__(self, root: Path) -> None:
+        self.root = root
+        self._anchors: dict[Path, set[str]] = {}
+
+    def anchors_for(self, path: Path) -> set[str]:
+        """Heading anchors of a Markdown file, parsed once per lint run."""
+        key = path.resolve()
+        if key not in self._anchors:
+            self._anchors[key] = markdown.anchors(read_lines(key))
+        return self._anchors[key]
 
 
 Rule = Callable[[Document, LintContext], list[Problem]]

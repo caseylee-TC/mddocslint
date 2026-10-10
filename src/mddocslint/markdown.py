@@ -7,6 +7,10 @@ from dataclasses import dataclass
 FENCE_RE = re.compile(r" {0,3}(`{3,}|~{3,})")
 ATX_HEADING_RE = re.compile(r" {0,3}(#{1,6})(?:[ \t]+|$)(.*)")
 CLOSING_HASHES_RE = re.compile(r"(?:^|[ \t]+)#+[ \t]*$")
+CODE_SPAN_RE = re.compile(r"(?<!`)(`+)(?!`).+?(?<!`)\1(?!`)")
+LINK_TEXT_RE = re.compile(r"!?\[([^\]]*)\]\([^)]*\)")
+HTML_TAG_RE = re.compile(r"<[^>]+>")
+SLUG_DROP_RE = re.compile(r"[^\w\- ]")
 
 
 @dataclass(frozen=True)
@@ -63,3 +67,28 @@ def iter_headings(lines: list[str]) -> Iterator[Heading]:
         if match:
             text = CLOSING_HASHES_RE.sub("", match.group(2)).strip()
             yield Heading(lineno, len(match.group(1)), text)
+
+
+def strip_code_spans(line: str) -> str:
+    """Blank out inline code spans, keeping column positions intact."""
+    return CODE_SPAN_RE.sub(lambda match: " " * len(match.group()), line)
+
+
+def slugify(text: str) -> str:
+    """GitHub-style heading anchor: lowercase, punctuation dropped, spaces to hyphens."""
+    text = LINK_TEXT_RE.sub(r"\1", text)
+    text = HTML_TAG_RE.sub("", text)
+    text = SLUG_DROP_RE.sub("", text.strip().lower())
+    return text.replace(" ", "-")
+
+
+def anchors(lines: list[str]) -> set[str]:
+    """All heading anchors in a document; repeated slugs get -1, -2, ... suffixes."""
+    counts: dict[str, int] = {}
+    result: set[str] = set()
+    for heading in iter_headings(lines):
+        base = slugify(heading.text)
+        count = counts.get(base, 0)
+        counts[base] = count + 1
+        result.add(base if count == 0 else f"{base}-{count}")
+    return result

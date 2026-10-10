@@ -17,15 +17,18 @@ EXIT_PROBLEMS = 1
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="mddocslint",
-        description="Lint Markdown docs for front matter problems and heading-level jumps.",
+        description="Lint Markdown docs for front matter problems, heading-level jumps, "
+        "and broken internal links.",
     )
     parser.add_argument("paths", nargs="+", type=Path, metavar="PATH",
                         help="Markdown files or folders to lint")
-    parser.add_argument("--select", metavar="RULES",
+    parser.add_argument("--rules", metavar="RULES",
                         help=f"comma-separated rules to run (default: all of {', '.join(RULES)})")
     parser.add_argument("--ignore", metavar="RULES", help="comma-separated rules to skip")
     parser.add_argument("--format", choices=["text", "json"], default="text",
                         help="output format (default: text)")
+    parser.add_argument("-q", "--quiet", action="store_true",
+                        help="don't print individual problems; keep the summary and exit code")
     parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     return parser
 
@@ -39,7 +42,7 @@ def parse_rule_list(parser: argparse.ArgumentParser, value: str) -> list[str]:
 
 
 def select_rules(parser: argparse.ArgumentParser, args: argparse.Namespace) -> list[str]:
-    selected = parse_rule_list(parser, args.select) if args.select is not None else list(RULES)
+    selected = parse_rule_list(parser, args.rules) if args.rules is not None else list(RULES)
     ignored = parse_rule_list(parser, args.ignore) if args.ignore is not None else []
     rules = [name for name in selected if name not in ignored]
     if not rules:
@@ -47,12 +50,14 @@ def select_rules(parser: argparse.ArgumentParser, args: argparse.Namespace) -> l
     return rules
 
 
-def report(problems: list[Problem], output_format: str) -> None:
+def report(problems: list[Problem], output_format: str, quiet: bool) -> None:
     if output_format == "json":
-        print(json.dumps([{**asdict(p), "path": p.path.as_posix()} for p in problems], indent=2))
+        if not quiet:
+            print(json.dumps([{**asdict(p), "path": p.path.as_posix()} for p in problems], indent=2))
         return
-    for p in problems:
-        print(f"{p.path.as_posix()}:{p.line}:{p.column}: {p.rule}[{p.kind}] {p.message}")
+    if not quiet:
+        for p in problems:
+            print(f"{p.path.as_posix()}:{p.line}:{p.column}: {p.rule}[{p.kind}] {p.message}")
     if problems:
         files = len({p.path for p in problems})
         print(f"{len(problems)} problem(s) in {files} file(s)", file=sys.stderr)
@@ -69,5 +74,5 @@ def main(argv: list[str] | None = None) -> int:
     problems, file_count = lint(args.paths, {name: RULES[name] for name in rules})
     if file_count == 0:
         parser.error("no Markdown files found")
-    report(problems, args.format)
+    report(problems, args.format, args.quiet)
     return EXIT_PROBLEMS if problems else EXIT_CLEAN
