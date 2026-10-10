@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mddocslint"
+dynamic = ["version"]
+description = "Lint a folder of Markdown docs for missing front matter, heading-level jumps, and broken internal links."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.12"
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[project.scripts]
+mddocslint = "mddocslint.cli:main"
+
+[tool.setuptools.dynamic]
+version = { attr = "mddocslint.__version__" }
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
