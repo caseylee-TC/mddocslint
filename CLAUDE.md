@@ -42,7 +42,7 @@ This repo is MIT licensed.
 - `src/mddocslint/`: `cli.py` (argparse), `core.py` (Problem, Document, runner), `markdown.py` (shared parsing helpers)
 - `src/mddocslint/rules/`: one module per rule, each exposing `RULE` and `check(doc, ctx)`, registered in `rules/__init__.py`
 - `tests/`: test files
-- `tests/fixtures/<rule>/<kind>/`: bad docs, one subfolder per problem kind (named after the kind), plus `valid/`
+- `tests/fixtures/<rule>/<kind>/`: bad docs, one subfolder per problem kind (named after the kind), plus `valid/`; each `.md` file at any depth must produce exactly one problem of its folder's kind (none under `valid/`)
 - `sample-docs/`: a clean demo set
 
 ## Conventions

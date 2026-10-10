@@ -1,4 +1,5 @@
-"""Each fixtures/front-matter/<kind>/ file yields exactly one problem of that kind; valid/ yields none."""
+"""Each Markdown file under fixtures/<rule>/<kind>/ (at any depth), linted on its own with
+only that rule, yields exactly one problem of that kind; files under valid/ yield none."""
 
 from pathlib import Path
 
@@ -8,33 +9,41 @@ from mddocslint.core import lint
 from mddocslint.rules import RULES
 
 FIXTURES = Path(__file__).parent / "fixtures"
-FRONT_MATTER = FIXTURES / "front-matter"
 SAMPLE_DOCS = Path(__file__).parent.parent / "sample-docs"
 
-KINDS = {"missing", "unclosed", "empty", "invalid-yaml"}
-FIXTURE_FILES = sorted(FRONT_MATTER.glob("*/*.md"))
+KINDS = {
+    "front-matter": {"missing", "unclosed", "empty", "invalid-yaml"},
+    "heading-jumps": {"skipped-level"},
+    "broken-links": {"missing-file", "missing-anchor"},
+}
+FIXTURE_FILES = sorted(FIXTURES.glob("*/*/**/*.md"))
 
 
-def expected_kinds(path: Path) -> list[str]:
-    return [] if path.parent.name == "valid" else [path.parent.name]
+def test_one_folder_per_rule() -> None:
+    assert set(KINDS) == set(RULES)
+    assert {path.name for path in FIXTURES.iterdir() if path.is_dir()} == set(RULES)
 
 
-def test_one_subfolder_per_kind_plus_valid() -> None:
-    subfolders = {path.name for path in FRONT_MATTER.iterdir() if path.is_dir()}
-    assert subfolders == KINDS | {"valid"}
+@pytest.mark.parametrize("rule", sorted(KINDS))
+def test_one_subfolder_per_kind_plus_valid(rule: str) -> None:
+    subfolders = {path.name for path in (FIXTURES / rule).iterdir() if path.is_dir()}
+    assert subfolders == KINDS[rule] | {"valid"}
     for name in subfolders:
-        assert any((FRONT_MATTER / name).glob("*.md")), f"{name}/ has no fixtures"
+        assert any((FIXTURES / rule / name).rglob("*.md")), f"{rule}/{name}/ has no fixtures"
 
 
 @pytest.mark.parametrize(
-    "path", FIXTURE_FILES, ids=[f"{p.parent.name}/{p.name}" for p in FIXTURE_FILES]
+    "path",
+    FIXTURE_FILES,
+    ids=[path.relative_to(FIXTURES).as_posix() for path in FIXTURE_FILES],
 )
-def test_front_matter_fixture(path: Path) -> None:
-    problems, _ = lint([path], RULES)
-    assert [p.kind for p in problems] == expected_kinds(path)
+def test_fixture(path: Path) -> None:
+    rule, kind = path.relative_to(FIXTURES).parts[:2]
+    problems, _ = lint([path], {rule: RULES[rule]})
+    assert [p.kind for p in problems] == ([] if kind == "valid" else [kind])
 
 
 def test_sample_docs_are_clean() -> None:
     problems, file_count = lint([SAMPLE_DOCS], RULES)
     assert problems == []
-    assert file_count == 3
+    assert file_count == 4
