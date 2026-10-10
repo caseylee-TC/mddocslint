@@ -46,4 +46,4 @@ def test_fixture(path: Path) -> None:
 def test_sample_docs_are_clean() -> None:
     problems, file_count = lint([SAMPLE_DOCS], RULES)
     assert problems == []
-    assert file_count == 3
+    assert file_count == 4
