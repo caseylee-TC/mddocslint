@@ -7,8 +7,9 @@ It checks a folder of Markdown files for problems:
 | ---- | ------- |
 | `front-matter` | missing, unclosed, empty, or invalid YAML front matter |
 | `heading-jumps` | headings that skip a level, such as H2 followed by H4 (headings in fenced code are ignored) |
+| `broken-links` | internal links and images whose file is missing (`missing-file`) or whose `#anchor` matches no heading in the target `.md` file (`missing-anchor`) |
 
-Planned: `broken-links` (internal links to missing files or anchors).
+`broken-links` resolves relative paths such as `../guide/setup.md` against the linking file's folder, and paths starting with `/` against the folder passed on the command line. It skips external URLs, `mailto:` links, anchor-only links such as `#setup`, and anything inside code.
 
 ## Install
 

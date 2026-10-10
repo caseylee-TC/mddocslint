@@ -65,7 +65,7 @@ def test_json_format_when_clean(capsys) -> None:
         [],
         ["does-not-exist"],
         [SAMPLE_DOCS, "--select", "no-such-rule"],
-        [SAMPLE_DOCS, "--ignore", "front-matter,heading-jumps"],
+        [SAMPLE_DOCS, "--ignore", "front-matter,heading-jumps,broken-links"],
         [SAMPLE_DOCS, "--format", "xml"],
     ],
 )
