@@ -1,5 +1,20 @@
 """Line-based Markdown helpers shared by the rules."""
 
+import re
+from collections.abc import Iterator
+from dataclasses import dataclass
+
+FENCE_RE = re.compile(r" {0,3}(`{3,}|~{3,})")
+ATX_HEADING_RE = re.compile(r" {0,3}(#{1,6})(?:[ \t]+|$)(.*)")
+CLOSING_HASHES_RE = re.compile(r"(?:^|[ \t]+)#+[ \t]*$")
+
+
+@dataclass(frozen=True)
+class Heading:
+    line: int
+    level: int
+    text: str
+
 
 def has_front_matter(lines: list[str]) -> bool:
     return bool(lines) and lines[0].rstrip() == "---"
@@ -13,3 +28,38 @@ def front_matter_close(lines: list[str]) -> int | None:
         if lines[index].rstrip() in ("---", "..."):
             return index
     return None
+
+
+def body_start(lines: list[str]) -> int:
+    """Index of the first line after a closed front matter block (0 if there is none)."""
+    close = front_matter_close(lines)
+    return 0 if close is None else close + 1
+
+
+def iter_content_lines(lines: list[str]) -> Iterator[tuple[int, str]]:
+    """Yield (1-based line number, line) outside front matter and fenced code blocks."""
+    fence = ""
+    for index in range(body_start(lines), len(lines)):
+        line = lines[index]
+        match = FENCE_RE.match(line)
+        if not fence:
+            if match:
+                fence = match.group(1)
+            else:
+                yield index + 1, line
+        elif match and _closes(fence, match.group(1)) and not line[match.end() :].strip():
+            fence = ""
+
+
+def _closes(opening: str, candidate: str) -> bool:
+    """A closing fence uses the opening fence's character and is at least as long."""
+    return candidate[0] == opening[0] and len(candidate) >= len(opening)
+
+
+def iter_headings(lines: list[str]) -> Iterator[Heading]:
+    """Yield ATX headings (# to ######) outside front matter and fenced code."""
+    for lineno, line in iter_content_lines(lines):
+        match = ATX_HEADING_RE.fullmatch(line)
+        if match:
+            text = CLOSING_HASHES_RE.sub("", match.group(2)).strip()
+            yield Heading(lineno, len(match.group(1)), text)

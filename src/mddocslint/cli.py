@@ -17,7 +17,7 @@ EXIT_PROBLEMS = 1
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="mddocslint",
-        description="Lint Markdown docs for problems such as missing or invalid front matter.",
+        description="Lint Markdown docs for front matter problems and heading-level jumps.",
     )
     parser.add_argument("paths", nargs="+", type=Path, metavar="PATH",
                         help="Markdown files or folders to lint")

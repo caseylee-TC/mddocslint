@@ -6,8 +6,9 @@ It checks a folder of Markdown files for problems:
 | Rule | Reports |
 | ---- | ------- |
 | `front-matter` | missing, unclosed, empty, or invalid YAML front matter |
+| `heading-jumps` | headings that skip a level, such as H2 followed by H4 (headings in fenced code are ignored) |
 
-Planned: `heading-jumps` (headings that skip a level) and `broken-links` (internal links to missing files or anchors).
+Planned: `broken-links` (internal links to missing files or anchors).
 
 ## Install
 
