@@ -21,4 +21,4 @@ Point it at a folder: `mddocslint ./docs`. See [exit codes](#exit-codes) for scr
 
 ## Rules
 
-Each rule is described on the [rules page](rules.md); all pages are listed in the [index](/index.md#contents).
+Each rule is described on the [rules page](rulez.md); all pages are listed in the [index](/index.md#contents).
