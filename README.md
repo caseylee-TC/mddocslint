@@ -35,3 +35,27 @@ docs/setup.md:3:1: front-matter[invalid-yaml] unquoted value contains ': '; quot
 - `--rules` / `--ignore` take comma-separated rule names, e.g. `--rules front-matter,broken-links`.
 - `-q` / `--quiet` hides the per-problem lines but keeps the summary line and the exit code.
 - Exit codes: `0` clean, `1` problems found, `2` usage error.
+
+## Pre-commit hook
+
+The repo includes a [pre-commit](https://pre-commit.com/) hook that runs `mddocslint sample-docs` before each commit, and blocks the commit if it finds problems. It runs only when a commit changes files in `sample-docs/` or `src/mddocslint/`.
+
+pre-commit isn't one of this project's dependencies, so install it separately. Then install the hook into your clone:
+
+```
+pip install pre-commit
+pre-commit install
+```
+
+The hook runs the `mddocslint` command from your environment, so activate the virtualenv before you commit:
+
+- PowerShell: `.venv\Scripts\Activate.ps1`
+- Git Bash: `source .venv/Scripts/activate`
+
+If you commit from an editor or Git client, make sure it uses the activated virtualenv, or the hook fails with "Executable `mddocslint` not found".
+
+To run the hook without committing:
+
+```
+pre-commit run mddocslint --all-files
+```
