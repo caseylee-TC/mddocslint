@@ -1,0 +1,9 @@
+repos:
+  - repo: local
+    hooks:
+      - id: mddocslint
+        name: mddocslint sample-docs
+        entry: mddocslint sample-docs
+        language: system
+        pass_filenames: false
+        files: ^(sample-docs|src/mddocslint)/
