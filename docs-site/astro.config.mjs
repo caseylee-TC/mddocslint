@@ -28,6 +28,8 @@ export default defineConfig({
 				{ label: 'Install', slug: 'install' },
 				{ label: 'Usage', slug: 'usage' },
 				{ label: 'Rules reference', slug: 'rules' },
+				{ label: 'Output', slug: 'output' },
+				{ label: 'Pre-commit hook', slug: 'pre-commit' },
 				{ label: 'Case study', slug: 'case-study' },
 			],
 		}),
