@@ -315,7 +315,7 @@ To see the exit code of the last command:
 
 - PowerShell: 
    ```
-   LASTEXITCODE
+   $LASTEXITCODE
    ```
 - Git Bash, macOS, and Linux: 
    ```
