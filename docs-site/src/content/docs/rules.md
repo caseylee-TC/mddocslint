@@ -3,11 +3,17 @@ title: Rules reference
 description: The checks mddocslint runs and the problem kinds each one reports.
 ---
 
-mddocslint has three rules. Each problem it reports names a rule and a kind, as in `front-matter[missing]`. To choose which rules run, use `--rules` and `--ignore` (see [Usage](./usage.md#options)).
+The linter checks every `.md` file based on three rules:
 
-## front-matter
+1. `front-matter`
+2. `heading-jumps`
+3. `broken-links`
 
-Each file must start with a YAML front matter block that is closed, not empty, and valid.
+Each problem it reports names a rule and a kind, as in `front-matter[missing]`. To choose which rules run, use the `--rules` and `--ignore` options (see the [full command](./usage.md#full-command)).
+
+## `front-matter`
+
+This rule checks for missing, unclosed, empty, or invalid basic YAML front matter.
 
 | Kind | Reported when |
 | ---- | ------------- |
@@ -16,26 +22,23 @@ Each file must start with a YAML front matter block that is closed, not empty, a
 | `empty` | The front matter block has no content. |
 | `invalid-yaml` | The block contains invalid YAML, such as an unquoted value that contains `: `. |
 
-## heading-jumps
+## `heading-jumps`
 
-A heading can be at most one level deeper than the heading before it. Headings inside fenced code blocks are ignored.
+This rule checks for Markdown style headings (#) that skip a level, such as H2 (##) followed by H4 (####). Headings in fenced code and front matter are ignored.
 
 | Kind | Reported when |
 | ---- | ------------- |
 | `skipped-level` | A heading skips a level, such as an H2 followed by an H4. |
 
-## broken-links
+## `broken-links`
 
-Internal links and images must point to files that exist, and their `#anchor` fragments must match a heading in the target `.md` file.
+This rule checks for internal links and images whose file is missing (`missing-file`) or whose `#anchor` matches no heading in the target `.md` file (`missing-anchor`).
 
 | Kind | Reported when |
 | ---- | ------------- |
 | `missing-file` | The linked file doesn't exist. |
 | `missing-anchor` | The `#anchor` doesn't match any heading in the target `.md` file. |
 
-`broken-links` resolves paths this way:
+`broken-links` resolves relative paths such as `../guide/setup.md` against the folder of the file that contains the link. It resolves paths that start with `/`, such as `/guide/setup.md`, against the folder you passed as [`PATH`](./usage.md#path). If you pass a single file, it resolves them against the folder that contains that file.
 
-- Relative paths, such as `../guide/setup.md`, resolve against the linking file's folder.
-- Paths starting with `/` resolve against the folder passed on the command line.
-
-It skips external URLs, `mailto:` links, anchor-only links such as `#setup`, and anything inside code.
+`broken-links` skips external URLs, `mailto:` links, anchor-only links such as `#setup`, and anything inside code.

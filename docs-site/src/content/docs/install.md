@@ -3,46 +3,77 @@ title: Install
 description: Install mddocslint from source.
 ---
 
-mddocslint requires Python 3.12 or later and has no runtime dependencies.
+## Prerequisites
 
-## Install from source
+- Python 3.12+
+- [Git](https://git-scm.com/downloads)
 
-1. Clone the repository:
+mddocslint has no runtime dependencies.
+
+## Installation steps
+
+1. Clone the repository and move into it:
 
    ```
    git clone https://github.com/caseylee-TC/mddocslint.git
    cd mddocslint
    ```
 
-2. Create and activate a virtualenv:
+2. Create a virtual environment. This keeps mddocslint separate from your other Python projects:
+
+   ```
+   python -m venv .venv
+   ```
+
+3. Activate the virtual environment:
 
    - PowerShell:
 
      ```
-     python -m venv .venv
      .venv\Scripts\Activate.ps1
      ```
 
    - Git Bash:
 
      ```
-     python -m venv .venv
      source .venv/Scripts/activate
      ```
 
-3. Install the package in editable mode, with the test dependencies:
+   - macOS and Linux:
+
+     ```
+     source .venv/bin/activate
+     ```
+
+   When it's active, your prompt starts with `(.venv)`. You must activate it again in every new terminal before you use `mddocslint`.
+
+4. Install mddocslint:
 
    ```
-   pip install -e ".[dev]"
+   python -m pip install .
    ```
 
-4. Check that the `mddocslint` command is available:
+   :::note
+   If you plan to change the code and run tests, install in editable mode with the `dev` extras (pytest):
 
    ```
-   mddocslint --version
+   python -m pip install -e ".[dev]"
    ```
+
+   Editable mode links the installed command to the files in `src/`, so your edits take effect right away. Run the tests with `pytest`.
+   :::
+
+5. Check that it is installed:
+
+   ```
+   mddocslint --help
+   ```
+
+   If you see the usage message, you're ready to go. If your shell says it can't find `mddocslint`, the virtual environment isn't active. Repeat step 3.
+
+To update mddocslint later, run `git pull` and then `python -m pip install .` again. A regular install is a copy, so it doesn't pick up changes until you reinstall.
 
 ## Next steps
 
 - [Run mddocslint](./usage.md) on a docs folder.
-- [Set up the pre-commit hook](./usage.md#run-mddocslint-before-each-commit) to lint before each commit.
+- [Set up the pre-commit hook](./pre-commit.md) to lint before each commit.
