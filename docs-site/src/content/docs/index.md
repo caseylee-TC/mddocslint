@@ -27,4 +27,3 @@ docs/setup.md:3:1: front-matter[invalid-yaml] unquoted value contains ': '; quot
 - See what each check reports in the [rules reference](./rules.md).
 - Learn how to [read the output](./output.md) and exit codes.
 - Set up the [pre-commit hook](./pre-commit.md).
-- Read the [case study](./case-study.md) about how mddocslint was built.
