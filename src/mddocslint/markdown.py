@@ -11,6 +11,7 @@ CODE_SPAN_RE = re.compile(r"(?<!`)(`+)(?!`).+?(?<!`)\1(?!`)")
 LINK_TEXT_RE = re.compile(r"!?\[([^\]]*)\]\([^)]*\)")
 HTML_TAG_RE = re.compile(r"<[^>]+>")
 SLUG_DROP_RE = re.compile(r"[^\w\- ]")
+SMART_DASH_RE = re.compile(r"-{2,3}")
 
 
 @dataclass(frozen=True)
@@ -82,13 +83,22 @@ def slugify(text: str) -> str:
     return text.replace(" ", "-")
 
 
+def heading_slugs(text: str) -> set[str]:
+    """The GitHub slug, plus the one sites with smart punctuation (Astro) produce.
+
+    Smart punctuation turns `--` and `---` into dashes, which the slugger drops,
+    so `## --format` is `#--format` on GitHub but `#format` on an Astro site.
+    """
+    return {slugify(text), slugify(SMART_DASH_RE.sub("", text))}
+
+
 def anchors(lines: list[str]) -> set[str]:
     """All heading anchors in a document; repeated slugs get -1, -2, ... suffixes."""
     counts: dict[str, int] = {}
     result: set[str] = set()
     for heading in iter_headings(lines):
-        base = slugify(heading.text)
-        count = counts.get(base, 0)
-        counts[base] = count + 1
-        result.add(base if count == 0 else f"{base}-{count}")
+        for base in heading_slugs(heading.text):
+            count = counts.get(base, 0)
+            counts[base] = count + 1
+            result.add(base if count == 0 else f"{base}-{count}")
     return result
