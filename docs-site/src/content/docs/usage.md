@@ -35,8 +35,18 @@ This command has two parts:
 
 | Part | What it is |
 | ---- | ---------- |
-| `mddocslint` | The program. It is available as a command once you've [installed](./install.md) the project and activated its virtual environment. |
+| `mddocslint` | Runs mddocslint. It is available as a command once you've [installed](./install.md) mddocslint and activated its virtual environment. |
 | `PATH` | The `PATH` argument: path of the file or folder to lint. `PATH` is a required part of the command. You can give it a path to a folder, a single `.md` file, or several of either. |
+
+A sample command to lint a single `.md` file:
+```
+mddocslint ./tests/fixtures/broken-links/missing-file/reference-definition.md
+```
+
+A sample command to lint a folder of `.md` files:
+```
+mddocslint ./tests/fixtures/heading-jumps
+```
 
 ## Full command
 
@@ -71,16 +81,21 @@ You can lint multiple files by putting a space between each file.
 For example, to lint two files, the command would be:
 
 ```
-mddocslint doc1.md doc2.md
+mddocslint duplicate-suffix.md wrong-case.md
 ```
 
-A folder is searched recursively for `.md` files. Folders that start with `.` such as `.git` are ignored. If you pass the same file twice, or a file that is also inside a folder you passed, it's linted once.
+A folder is searched recursively for `.md` files. Folders that start with `.` such as `.git` are ignored. If you pass the same file twice, or a file that is also inside a folder you passed, it is linted once.
 
-mddocslint exits with code 2 if a path doesn't exist, or if a folder contains no Markdown files.
+mddocslint exits with code 2 if a path does not exist, or if a folder contains no Markdown files.
 
 ## --rules
 
 Use this component on the command line if you want to run only specific rules.
+
+For example:
+```
+mddocslint PATH --rules front-matter
+```
 
 Options:
 
@@ -116,13 +131,21 @@ Options:
 - `heading-jumps`
 - `broken-links`
 
+To ignore more than one rule, separate the names with commas and no spaces.
+
+For example, a command to ignore the `front-matter` and `heading-jumps` rules would be:
+
+```
+mddocslint PATH --ignore front-matter,heading-jumps
+```
+
 If you leave `--ignore` out, no rules are skipped.
 
 ## Using --rules and --ignore together
 
 You can use `--rules` and `--ignore` together. mddocslint first picks the rules from `--rules`, then removes any that appear in `--ignore`.
 
-If nothing is left to run, the command exits with code 2 and the message `no rules left to run`.
+If nothing is left to run, the command exits with [code 2](./output.md#exit-code-2) and the message `no rules left to run`.
 
 ```
 mddocslint --rules broken-links --ignore broken-links missing-image.md
@@ -142,11 +165,9 @@ Options:
 
 Any other value is a usage error.
 
-The default is `text`, which shows one line per problem.
+The default is `text`, which shows one line per problem, and a summary line at the end.
 
 ```
-mddocslint docs docs/guide/setup.md
-
 docs/guide/setup.md:1:1: front-matter[missing] file does not start with a '---' front matter block
 docs/guide/setup.md:3:1: heading-jumps[skipped-level] heading jumps from H1 to H3; the next level down is H2
 docs/guide/setup.md:5:20: broken-links[missing-file] link target 'guide/missing.md' does not exist
@@ -202,10 +223,6 @@ The [exit code](./output.md) is the same in both formats: `1` when problems are 
 
 Hides the individual problems. Use it when you only care about the exit code or the total.
 
-Options: none. It's a switch that you either include or leave out.
-
-Default: off, so problems are printed.
-
 With the default `text` format, `--quiet` still prints the summary line:
 
 ```
@@ -213,14 +230,7 @@ mddocslint docs -q
 3 problem(s) in 1 file(s)
 ```
 
-With `--format json`, `--quiet` prints nothing at all, because the JSON output has no summary line. The exit code is the only result:
-
-```
-mddocslint docs --format json -q
-$
-```
-
-In both cases the exit code is still `1`, because problems were found.
+With `--format json`, `--quiet` prints nothing at all, because the JSON output has no summary line. The [exit code](./output.md) is the only result.
 
 ## --version
 
