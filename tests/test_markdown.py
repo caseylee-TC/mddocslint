@@ -77,6 +77,13 @@ def test_anchors_number_duplicate_headings() -> None:
     assert markdown.anchors(lines) == {"intro", "intro-1", "intro-2", "other"}
 
 
+def test_anchors_include_smart_dash_slugs() -> None:
+    lines = ["## --format", "## -q, --quiet", "## --format"]
+    assert markdown.anchors(lines) == {
+        "--format", "--format-1", "format", "format-1", "-q---quiet", "-q-quiet",
+    }
+
+
 def test_anchors_ignore_headings_in_fences() -> None:
     assert markdown.anchors(["# Real", "```", "# Fake", "```"]) == {"real"}
 
